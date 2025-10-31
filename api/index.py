@@ -19,11 +19,14 @@ def get_db():
     if not database_url:
         raise Exception("POSTGRES_URL environment variable not set")
 
-    # Use the connection string directly with SSL mode
-    # Ensure sslmode is in the connection string
-    if 'sslmode=' not in database_url:
-        separator = '&' if '?' in database_url else '?'
-        database_url = f"{database_url}{separator}sslmode=require"
+    # Remove any sslmode from URL and set it properly
+    # This fixes "invalid channel binding" error with Neon
+    import re
+    database_url = re.sub(r'[?&]sslmode=[^&]*', '', database_url)
+
+    # Add proper SSL parameters for Neon
+    separator = '&' if '?' in database_url else '?'
+    database_url = f"{database_url}{separator}sslmode=require&sslrootcert=system"
 
     conn = psycopg2.connect(database_url)
     return conn
