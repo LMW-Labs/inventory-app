@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Cycle Count</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Inventory Cycle Count</h1>
+        </header>
+
+        <!-- Upload Section -->
+        <section id="upload-section" class="section">
+            <h2>Step 1: Upload Inventory Spreadsheet</h2>
+            <div class="upload-box">
+                <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+                <button id="upload-btn" class="btn btn-primary">Upload Spreadsheet</button>
+                <p id="upload-status" class="status-message"></p>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section id="stats-section" class="section">
+            <h2>Scanning Progress</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Items</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Scanned</div>
+                    <div class="stat-value" id="stat-scanned">0</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-label">Shortages</div>
+                    <div class="stat-value" id="stat-shortages">0</div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-label">Overages</div>
+                    <div class="stat-value" id="stat-overages">0</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-label">Wrong Location</div>
+                    <div class="stat-value" id="stat-wrong">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scanner Section -->
+        <section id="scanner-section" class="section">
+            <h2>Step 2: Scan Barcodes</h2>
+
+            <div class="scanner-controls">
+                <button id="start-scan-btn" class="btn btn-success">Start Camera</button>
+                <button id="stop-scan-btn" class="btn btn-danger" style="display: none;">Stop Camera</button>
+            </div>
+
+            <div id="scanner-container">
+                <video id="scanner-video" playsinline></video>
+                <canvas id="scanner-canvas"></canvas>
+            </div>
+
+            <div class="manual-entry">
+                <input type="text" id="manual-barcode" placeholder="Or enter barcode manually">
+                <input type="text" id="manual-location" placeholder="Current location (optional)">
+                <button id="manual-submit" class="btn btn-secondary">Submit</button>
+            </div>
+
+            <!-- Scan Result Display -->
+            <div id="scan-result" class="scan-result" style="display: none;">
+                <div id="result-content"></div>
+            </div>
+        </section>
+
+        <!-- Export Section -->
+        <section id="export-section" class="section">
+            <h2>Step 3: Export Report</h2>
+            <div class="export-controls">
+                <button id="export-btn" class="btn btn-primary">Download Report</button>
+                <button id="reset-btn" class="btn btn-warning">Reset Scan Data</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
