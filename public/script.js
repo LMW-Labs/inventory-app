@@ -1,5 +1,27 @@
 // Configuration - will use relative URLs for Vercel
 const API_URL = '/api';
+const FETCH_TIMEOUT = 30000; // 30 seconds for database wake-up
+
+// Fetch with timeout and retry for database wake-up
+async function fetchWithTimeout(url, options = {}, timeout = FETCH_TIMEOUT) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        if (error.name === 'AbortError') {
+            throw new Error('Request timeout - database may be waking up. Please try again.');
+        }
+        throw error;
+    }
+}
 
 // DOM Elements
 const fileInput = document.getElementById('file-input');
@@ -46,8 +68,9 @@ uploadBtn.addEventListener('click', async () => {
     try {
         uploadBtn.disabled = true;
         uploadBtn.textContent = 'Uploading...';
+        showStatus('Uploading spreadsheet (database may take a moment to wake up)...', 'info');
 
-        const response = await fetch(`${API_URL}/upload`, {
+        const response = await fetchWithTimeout(`${API_URL}/upload`, {
             method: 'POST',
             body: formData
         });
@@ -238,7 +261,7 @@ function displayScanResult(data) {
 // Update statistics
 async function updateStats() {
     try {
-        const response = await fetch(`${API_URL}/stats`);
+        const response = await fetchWithTimeout(`${API_URL}/stats`);
         const data = await response.json();
 
         if (response.ok) {
@@ -250,6 +273,12 @@ async function updateStats() {
         }
     } catch (error) {
         console.error('Error updating stats:', error);
+        // Set to 0 if database is sleeping
+        statTotal.textContent = '...';
+        statScanned.textContent = '...';
+        statShortages.textContent = '...';
+        statOverages.textContent = '...';
+        statWrong.textContent = '...';
     }
 }
 
