@@ -409,7 +409,3 @@ def health_check():
 
 # Don't initialize on import for Vercel - can cause cold start issues
 # Use the /api/init endpoint to initialize tables when ready
-
-# Vercel serverless function handler
-def handler(event, context):
-    return app
