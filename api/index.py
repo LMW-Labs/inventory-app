@@ -13,6 +13,12 @@ from urllib.parse import urlparse
 app = Flask(__name__)
 CORS(app)
 
+# Test route to verify API is working
+@app.route('/api/', methods=['GET'])
+@app.route('/api', methods=['GET'])
+def api_root():
+    return jsonify({'status': 'ok', 'message': 'Inventory API is running'})
+
 # Get database connection
 def get_db():
     database_url = os.environ.get('POSTGRES_URL')
