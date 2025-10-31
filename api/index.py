@@ -76,7 +76,7 @@ def init_db():
     except Exception as e:
         print(f"Database init error: {e}")
 
-@app.route('/upload', methods=['POST'])
+@app.route('/api/upload', methods=['POST'])
 def upload_spreadsheet():
     """Upload and parse inventory spreadsheet"""
     try:
@@ -128,7 +128,7 @@ def upload_spreadsheet():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/scan', methods=['POST'])
+@app.route('/api/scan', methods=['POST'])
 def scan_barcode():
     """Process a barcode scan"""
     try:
@@ -210,7 +210,7 @@ def scan_barcode():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/stats', methods=['GET'])
+@app.route('/api/stats', methods=['GET'])
 def get_stats():
     """Get current scanning statistics"""
     try:
@@ -259,7 +259,7 @@ def get_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/export', methods=['GET'])
+@app.route('/api/export', methods=['GET'])
 def export_report():
     """Generate and export discrepancy report"""
     try:
@@ -371,7 +371,7 @@ def export_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/reset', methods=['POST'])
+@app.route('/api/reset', methods=['POST'])
 def reset_scans():
     """Reset all scan data while keeping inventory"""
     try:
@@ -387,7 +387,7 @@ def reset_scans():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/init', methods=['POST', 'GET'])
+@app.route('/api/init', methods=['POST', 'GET'])
 def init_database():
     """Initialize database tables - call this once after deployment"""
     try:
@@ -396,7 +396,7 @@ def init_database():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/health', methods=['GET'])
+@app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
     try:
@@ -409,3 +409,7 @@ def health_check():
 
 # Don't initialize on import for Vercel - can cause cold start issues
 # Use the /api/init endpoint to initialize tables when ready
+
+# Vercel serverless function handler
+def handler(event, context):
+    return app
