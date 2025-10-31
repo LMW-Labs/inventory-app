@@ -19,20 +19,13 @@ def get_db():
     if not database_url:
         raise Exception("POSTGRES_URL environment variable not set")
 
-    # Parse the URL and create connection with SSL mode
-    result = urlparse(database_url)
+    # Use the connection string directly with SSL mode
+    # Ensure sslmode is in the connection string
+    if 'sslmode=' not in database_url:
+        separator = '&' if '?' in database_url else '?'
+        database_url = f"{database_url}{separator}sslmode=require"
 
-    # Build connection parameters
-    conn_params = {
-        'database': result.path[1:],
-        'user': result.username,
-        'password': result.password,
-        'host': result.hostname,
-        'port': result.port or 5432,
-        'sslmode': 'require'  # Neon requires SSL
-    }
-
-    conn = psycopg2.connect(**conn_params)
+    conn = psycopg2.connect(database_url)
     return conn
 
 def init_db():
