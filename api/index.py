@@ -388,12 +388,5 @@ def init_database():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Initialize database on first import
-try:
-    init_db()
-except:
-    pass
-
-# For Vercel
-def handler(request):
-    return app(request)
+# Don't initialize on import for Vercel - can cause cold start issues
+# Use the /api/init endpoint to initialize tables when ready
