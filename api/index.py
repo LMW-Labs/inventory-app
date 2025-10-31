@@ -19,13 +19,19 @@ def get_db():
     if not database_url:
         raise Exception("POSTGRES_URL environment variable not set")
 
-    # Remove any SSL parameters from URL and set them properly
-    # Use simple sslmode=require (no cert verification) for Vercel compatibility
+    # Clean up the connection string properly
+    # Remove problematic SSL parameters and channel_binding
     import re
-    database_url = re.sub(r'[?&]sslmode=[^&]*', '', database_url)
-    database_url = re.sub(r'[?&]sslrootcert=[^&]*', '', database_url)
 
-    # Add sslmode=require without certificate verification
+    # Remove sslmode, sslrootcert, and channel_binding parameters
+    database_url = re.sub(r'[?&]sslmode=[^&]*&?', '', database_url)
+    database_url = re.sub(r'[?&]sslrootcert=[^&]*&?', '', database_url)
+    database_url = re.sub(r'[?&]channel_binding=[^&]*&?', '', database_url)
+
+    # Clean up any trailing ? or & characters
+    database_url = re.sub(r'[?&]$', '', database_url)
+
+    # Add sslmode=require (simple SSL without verification)
     separator = '&' if '?' in database_url else '?'
     database_url = f"{database_url}{separator}sslmode=require"
 
