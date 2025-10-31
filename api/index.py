@@ -20,14 +20,14 @@ def get_db():
         raise Exception("POSTGRES_URL environment variable not set")
 
     # Remove any SSL parameters from URL and set them properly
-    # This fixes "invalid channel binding" error with Neon
+    # Use simple sslmode=require (no cert verification) for Vercel compatibility
     import re
     database_url = re.sub(r'[?&]sslmode=[^&]*', '', database_url)
     database_url = re.sub(r'[?&]sslrootcert=[^&]*', '', database_url)
 
-    # Add proper SSL parameters for Neon - use verify-full with system root cert
+    # Add sslmode=require without certificate verification
     separator = '&' if '?' in database_url else '?'
-    database_url = f"{database_url}{separator}sslmode=verify-full&sslrootcert=system"
+    database_url = f"{database_url}{separator}sslmode=require"
 
     conn = psycopg2.connect(database_url)
     return conn
