@@ -19,15 +19,20 @@ def get_db():
     if not database_url:
         raise Exception("POSTGRES_URL environment variable not set")
 
-    # Parse the URL and create connection
+    # Parse the URL and create connection with SSL mode
     result = urlparse(database_url)
-    conn = psycopg2.connect(
-        database=result.path[1:],
-        user=result.username,
-        password=result.password,
-        host=result.hostname,
-        port=result.port
-    )
+
+    # Build connection parameters
+    conn_params = {
+        'database': result.path[1:],
+        'user': result.username,
+        'password': result.password,
+        'host': result.hostname,
+        'port': result.port or 5432,
+        'sslmode': 'require'  # Neon requires SSL
+    }
+
+    conn = psycopg2.connect(**conn_params)
     return conn
 
 def init_db():
@@ -379,7 +384,7 @@ def reset_scans():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/init', methods=['POST'])
+@app.route('/api/init', methods=['POST', 'GET'])
 def init_database():
     """Initialize database tables - call this once after deployment"""
     try:
@@ -387,6 +392,17 @@ def init_database():
         return jsonify({'success': True, 'message': 'Database initialized successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    try:
+        # Test database connection
+        conn = get_db()
+        conn.close()
+        return jsonify({'status': 'healthy', 'database': 'connected'})
+    except Exception as e:
+        return jsonify({'status': 'unhealthy', 'error': str(e)}), 500
 
 # Don't initialize on import for Vercel - can cause cold start issues
 # Use the /api/init endpoint to initialize tables when ready
