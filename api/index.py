@@ -19,25 +19,6 @@ CORS(app)
 def api_root():
     return jsonify({'status': 'ok', 'message': 'Inventory API is running', 'version': '2'})
 
-@app.route('/api/debug-db', methods=['GET'])
-def debug_db():
-    """Debug endpoint to check URL parsing - remove in production"""
-    database_url = os.environ.get('POSTGRES_URL', '')
-    parsed = urlparse(database_url)
-    dbname = parsed.path.lstrip('/')
-    if '?' in dbname:
-        dbname = dbname.split('?')[0]
-    if ';' in dbname:
-        dbname = dbname.split(';')[0]
-    return jsonify({
-        'host': parsed.hostname,
-        'port': parsed.port,
-        'dbname_raw': parsed.path,
-        'dbname_cleaned': dbname,
-        'has_query': bool(parsed.query),
-        'query_preview': parsed.query[:50] if parsed.query else None
-    })
-
 # Get database connection
 def get_db():
     database_url = os.environ.get('POSTGRES_URL')
