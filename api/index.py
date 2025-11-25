@@ -25,23 +25,25 @@ def get_db():
     if not database_url:
         raise Exception("POSTGRES_URL environment variable not set")
 
-    # Clean up the connection string properly
-    # Remove problematic SSL parameters and channel_binding
-    import re
+    # Parse the URL properly to handle all parameter formats
+    parsed = urlparse(database_url)
 
-    # Remove sslmode, sslrootcert, and channel_binding parameters
-    database_url = re.sub(r'[?&]sslmode=[^&]*&?', '', database_url)
-    database_url = re.sub(r'[?&]sslrootcert=[^&]*&?', '', database_url)
-    database_url = re.sub(r'[?&]channel_binding=[^&]*&?', '', database_url)
+    # Extract base connection info
+    user = parsed.username
+    password = parsed.password
+    host = parsed.hostname
+    port = parsed.port or 5432
+    dbname = parsed.path.lstrip('/')
 
-    # Clean up any trailing ? or & characters
-    database_url = re.sub(r'[?&]$', '', database_url)
-
-    # Add sslmode=require (simple SSL without verification)
-    separator = '&' if '?' in database_url else '?'
-    database_url = f"{database_url}{separator}sslmode=require"
-
-    conn = psycopg2.connect(database_url)
+    # Connect using explicit parameters (avoids URL parsing issues)
+    conn = psycopg2.connect(
+        host=host,
+        port=port,
+        dbname=dbname,
+        user=user,
+        password=password,
+        sslmode='require'
+    )
     return conn
 
 def init_db():
