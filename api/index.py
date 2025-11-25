@@ -25,7 +25,7 @@ def get_db():
     if not database_url:
         raise Exception("POSTGRES_URL environment variable not set")
 
-    # Parse the URL properly to handle all parameter formats
+    # Parse the URL properly to handle Neon's complex URL format
     parsed = urlparse(database_url)
 
     # Extract base connection info
@@ -33,7 +33,15 @@ def get_db():
     password = parsed.password
     host = parsed.hostname
     port = parsed.port or 5432
+
+    # Handle database name - Neon URLs may have params after db name
+    # Path looks like /neondb or /neondb?params or /neondb;params
     dbname = parsed.path.lstrip('/')
+    # Strip anything after ? or ; in the database name
+    if '?' in dbname:
+        dbname = dbname.split('?')[0]
+    if ';' in dbname:
+        dbname = dbname.split(';')[0]
 
     # Connect using explicit parameters (avoids URL parsing issues)
     conn = psycopg2.connect(
